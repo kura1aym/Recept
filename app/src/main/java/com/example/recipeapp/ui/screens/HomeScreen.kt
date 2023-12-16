@@ -83,6 +83,7 @@ private fun RecipeListScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
+    SearchSection()
     TopRecipeSection()
     Spacer(modifier)
     CategoriesSection()
