@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             RecipeAppTheme {
+                // A surface container using the 'background' color from the theme
                 SetBarColor(color = MaterialTheme.colorScheme.background)
                 Surface(
                     modifier = Modifier.fillMaxSize()
