@@ -14,6 +14,8 @@ import com.example.recipeapp.core.Resource
 import com.example.recipeapp.data.mapper.toRecipeDtoItem
 import com.example.recipeapp.data.remote.dto.recipes.RecipeDtoItem
 import com.example.recipeapp.domain.repository.RecipeRepository
+import com.example.recipeapp.domain.usercases.UseCaseGetRecipeSavedStatus
+import com.example.recipeapp.domain.usercases.UseCaseSaveRecipe
 
 
 import com.example.recipeapp.ui.recipe_screen.components.RecipeScreenState
@@ -29,7 +31,10 @@ import kotlin.math.ceil
 class RecipeScreenViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val recipeRepository: RecipeRepository,
-   ) : ViewModel() {
+    private val useCaseSaveRecipe: UseCaseSaveRecipe,
+    private val useCaseGetRecipeSavedStatus: UseCaseGetRecipeSavedStatus
+
+) : ViewModel() {
     private val _recipeState = mutableStateOf<RecipeScreenState>(RecipeScreenState())
     val recipeState: State<RecipeScreenState> = _recipeState
 
@@ -58,11 +63,56 @@ class RecipeScreenViewModel @Inject constructor(
 
             val shouldLoadFromSavedRecipes = savedStateHandle.get<Boolean>(Constants.RECIPE_SCREEN_SHOULD_LOAD_FROM_SAVED_RECIPES) ?: true
             Log.d("recipescreenviewmodel", "should load from saved recipes is $shouldLoadFromSavedRecipes")
-
+            getRecipe(shouldLoadFromSavedRecipes = shouldLoadFromSavedRecipes)
+            setFavouriteState()
         }
     }
 
-
+    private suspend fun getRecipe(shouldLoadFromSavedRecipes: Boolean) {
+        if (shouldLoadFromSavedRecipes) {
+            val recipeResult = recipeRepository.getLocalRecipeByTitle(title = recipeTitle.value)
+            when (recipeResult) {
+                is Resource.Error -> {
+                    _recipeState.value = _recipeState.value.copy(
+                        isLoading = false,
+                        error = "Unable to load recipe. Please try again later"
+                    )
+                }
+                is Resource.Loading -> {
+                    _recipeState.value = _recipeState.value.copy(isLoading = true, error = "")
+                }
+                is Resource.Success -> {
+                    _recipeState.value = _recipeState.value.copy(
+                        isLoading = false,
+         //               recipe = recipeResult.data?.toRecipeDtoItem() ?: RecipeDtoItem()
+                    )
+                }
+            }
+        } else {
+            recipeRepository.getRecipeByTitle(
+                title = recipeTitle.value,
+                category = recipeCategory.value
+            ).collectLatest { recipeResult ->
+                when (recipeResult) {
+                    is Resource.Error -> {
+                        _recipeState.value = _recipeState.value.copy(
+                            isLoading = false,
+                            error = "Unable to load recipe. Please try again later"
+                        )
+                    }
+                    is Resource.Loading -> {
+                        _recipeState.value = _recipeState.value.copy(isLoading = true, error = "")
+                    }
+                    is Resource.Success -> {
+                        _recipeState.value = _recipeState.value.copy(
+                            isLoading = false,
+                            recipe = recipeResult.data ?: RecipeDtoItem()
+                        )
+                    }
+                }
+            }
+        }
+    }
     fun sendRecipeScreenUiEvent(uiEvents: RecipeScreenEvents) {
         viewModelScope.launch {
             when (uiEvents) {
@@ -74,7 +124,40 @@ class RecipeScreenViewModel @Inject constructor(
             }
         }
     }
+    private fun setFavouriteState(){
+        viewModelScope.launch {
+            val currentRecipe = _recipeState.value.recipe
+            useCaseGetRecipeSavedStatus(title = currentRecipe.title).collectLatest {
+                _favouriteState.value = it
+            }
+            Log.d("recipescreenviewmodel","favourite state is ${recipeTitle.value}")
+        }
+    }
 
+    fun onSaveRecipeButtonClicked() {
+        viewModelScope.launch {
+            val currentRecipe = _recipeState.value.recipe
+            useCaseSaveRecipe(recipeDtoItem = currentRecipe).collectLatest {
+                _favouriteState.value = it
+            }
+            Log.d("recipescreenviewmodel","favourite state is ${_favouriteState.value.name}")
+            when (_favouriteState.value){
+                RecipeSaveState.SAVED -> {
+                    sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar("Recipe SAVED successfully"))
+                }
+                RecipeSaveState.ALREADY_EXISTS -> {
+                    sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar("Recipe ALREADY exists"))
+                }
+                RecipeSaveState.UNABLE_TO_SAVE -> {
+                    sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar("UNABLE to save recipe, try again"))
+                }
+                RecipeSaveState.NOT_SAVED -> {
+                    sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar("REMOVED from favourites"))
+                }
+            }
+
+        }
+    }
 
 
     fun onSliderValueChanged(newValue: Float){
