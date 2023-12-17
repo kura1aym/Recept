@@ -10,13 +10,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.recipeapp.ui.theme.RecipeAppTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val directory = getDirectory()
+        val file = File(directory, "ingredientlist.pdf")
         setContent {
             RecipeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -24,6 +29,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    RecipeApp()
                 }
             }
         }
@@ -37,5 +43,19 @@ class MainActivity : ComponentActivity() {
                 color = color
             )
         }
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Composable
+    fun CheckForPermissions() {
+    }
+    private fun getDirectory(): File {
+        val mediaDir = externalMediaDirs.firstOrNull()?.let{
+            File(it, resources.getString(com.example.recipeapp.R.string.app_name))
+                .apply {
+                    mkdir()
+                }
+        }
+        return if(mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
 }
