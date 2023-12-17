@@ -13,7 +13,7 @@ interface RecipeRepository {
         fetchFromRemote: Boolean
     ): Resource<List<RecipeDtoItem>>
 
-    suspend fun getFirstFourRecipes(): Resource<List<RecipeDtoItem>>
+    suspend fun getFirstFourRecipes(fetchFromRemote: Boolean): Resource<List<RecipeDtoItem>>
 
     suspend fun getRecipeByTitle(title: String, category: String): Flow<Resource<RecipeDtoItem>>
 
