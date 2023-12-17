@@ -11,10 +11,10 @@ android {
         freeCompilerArgs = ['-Xjvm-default=compatibility']
     }
 
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
-        applicationId "com.jatinvashisht.letscookit"
+        applicationId "com.example.recipeapp"
         minSdk 23
         targetSdk 32
         versionCode 1
