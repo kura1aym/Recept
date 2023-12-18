@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.recipeapp.core.Screen
+import com.example.recipeapp.ui.screens.categories_screen.CategoriesScreen
 import com.example.recipeapp.ui.screens.home_screen.HomeScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -42,6 +43,11 @@ fun RecipeApp() {
             composable(route = Screen.HomeScreen.route) {
                 HomeScreen(navController = navController) {
                 }
+            }
+            composable(route = Screen.CategoriesScreen.route){
+                CategoriesScreen(
+                    navController = navController
+                )
             }
         }
     }

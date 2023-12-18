@@ -9,4 +9,6 @@
     <string name="popular_recipes">Popular Picks</string>
     <string name="categories">Categories</string>
     <string name="view_all">View All</string>
+    <string name="favourites_recipes">Favourites</string>
+    <string name="saved_recipes">saved recipes</string>
 </resources>

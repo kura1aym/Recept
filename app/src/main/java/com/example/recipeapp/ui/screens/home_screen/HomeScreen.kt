@@ -1,6 +1,7 @@
 package com.example.recipeapp.ui.screens.home_screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,6 +24,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +49,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -117,11 +123,65 @@ fun HomeScreen(
         }
     }
 
-
     Scaffold(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.colorScheme.background,
         drawerContent = {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.tertiary)
+                ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ingredients),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(200.dp)
+                        .width(300.dp),
+                    contentScale = ContentScale.Fit,
+                )
+
+                Row(
+                    modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        navController.navigate(Screen.RecipeListScreen.route + "/saved/$url/true")
+                    }
+                    .padding(Padding.medium), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.navigate(Screen.RecipeListScreen.route + "/saved/$url/true") }) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = stringResource(R.string.saved_recipes),
+                            tint = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(Padding.small))
+                    Text(text = stringResource(R.string.favourites_recipes), color = MaterialTheme.colorScheme.onTertiary)
+                }
+
+                Row(
+                    modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        viewModel.sendUiEvents(HomeScreenUiEvents.NavigateToCategoriesScreen)
+                    }
+                    .padding(Padding.medium), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        viewModel.sendUiEvents(
+                            HomeScreenUiEvents.NavigateToCategoriesScreen
+                        )
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.More,
+                            contentDescription = stringResource(R.string.saved_recipes),
+                            tint = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(Padding.small))
+                    Text(text = stringResource(R.string.categories), color = MaterialTheme.colorScheme.onTertiary)
+                }
+            }
         }
     ) { padding ->
         LazyColumn {
@@ -253,6 +313,10 @@ fun HomeScreen(
                                                 launchSingleTop = true
                                             }
                                         }
+                                        .background(
+                                            color = MaterialTheme.colorScheme.background,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
                                 )
                                 {
                                     SubcomposeAsyncImage(
@@ -348,7 +412,6 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center) {
                             items(categoriesState.categories) { item ->
-                                var isClicked by remember { mutableStateOf(false) }
                                 Column(
                                     modifier = Modifier
                                         .width(250.dp)
@@ -363,13 +426,11 @@ fun HomeScreen(
                                                     )
                                                 }/false"
                                             ) { launchSingleTop = true }
-                                            isClicked = !isClicked
                                         }
-                                        .graphicsLayer {
-                                        shape = RoundedCornerShape(Padding.medium)
-                                        clip = true
-                                        }
-                                        .shadow(elevation = if (isClicked) 8.dp else 0.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.background,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
                                 )
                                 {
                                     SubcomposeAsyncImage(
