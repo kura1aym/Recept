@@ -22,9 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
-import androidx.compose.material.icons.filled.ContactPage
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,9 +32,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
@@ -46,10 +47,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import com.example.recipeapp.R
 import com.example.recipeapp.core.Padding
@@ -69,6 +72,7 @@ fun HomeScreen(
     onFinishCalled: () -> Unit,
 ) {
     val popularPicksState by viewModel.popularPicks
+    val categoriesState by viewModel.categoriesState
     val scaffoldState = rememberScaffoldState()
     val url = URLEncoder.encode(
         "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=481&q=80",
@@ -118,7 +122,6 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.colorScheme.background,
         drawerContent = {
-
         }
     ) { padding ->
         LazyColumn {
@@ -261,6 +264,11 @@ fun HomeScreen(
                                             .graphicsLayer {
                                                 shape = RoundedCornerShape(Padding.medium)
                                                 clip = true
+                                            }
+                                            .clickable {
+                                                navController.navigate(Screen.RecipeScreen.route + "/${item.title}/${item.tag}/false") {
+                                                    launchSingleTop = true
+                                                }
                                             },
                                         contentScale = ContentScale.Crop,
                                         loading = {
@@ -274,6 +282,118 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.width(Padding.small))
                                     Text(
                                         text = item.title,
+                                        fontFamily = lemonMilkFonts,
+                                        fontWeight = FontWeight.Normal,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight()
+                                    )
+                                    Spacer(modifier = Modifier.width(Padding.small))
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(Padding.medium))
+                    }
+                }
+            }
+            item(4) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Padding.small)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically,) {
+                        androidx.compose.material.Text(
+                            text = stringResource(R.string.categories),
+                            fontFamily = lemonMilkFonts,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(Padding.medium/2),
+                            style = androidx.compose.material.MaterialTheme.typography.h5
+                        )
+                    }
+
+                    androidx.compose.material.Text(
+                        text = stringResource(R.string.view_all),
+                        modifier = Modifier
+                            .padding(Padding.medium)
+                            .clickable {
+                                viewModel.sendUiEvents(HomeScreenUiEvents.NavigateToCategoriesScreen)
+                            },
+                        fontFamily = lemonMilkFonts,
+                        fontWeight = FontWeight.Medium,
+                        style = androidx.compose.material.MaterialTheme.typography.h6,
+                    )
+                }
+            }
+
+            item(5) {
+                when {
+                    categoriesState.isLoading -> {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = androidx.compose.material.MaterialTheme.colors.primaryVariant)
+                        }
+                    }
+                    categoriesState.error.isNotBlank() -> {
+                        Text(text = categoriesState.error,
+                            color = Color.Yellow,
+                            modifier = Modifier.padding(horizontal = Padding.medium))
+                    }
+                    else -> {
+                        LazyRow(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center) {
+                            items(categoriesState.categories) { item ->
+                                var isClicked by remember { mutableStateOf(false) }
+                                Column(
+                                    modifier = Modifier
+                                        .width(250.dp)
+                                        .height(170.dp)
+                                        .padding(horizontal = Padding.medium)
+                                        .clickable {
+                                            navController.navigate(
+                                                route = Screen.RecipeListScreen.route + "/${item.category}/${
+                                                    URLEncoder.encode(
+                                                        item.imageUrl,
+                                                        StandardCharsets.UTF_8.toString()
+                                                    )
+                                                }/false"
+                                            ) { launchSingleTop = true }
+                                            isClicked = !isClicked
+                                        }
+                                        .graphicsLayer {
+                                        shape = RoundedCornerShape(Padding.medium)
+                                        clip = true
+                                        }
+                                        .shadow(elevation = if (isClicked) 8.dp else 0.dp)
+                                )
+                                {
+                                    SubcomposeAsyncImage(
+                                        model = item.imageUrl,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight(0.6f)
+                                            .graphicsLayer {
+                                                shape = RoundedCornerShape(Padding.medium)
+                                                clip = true
+                                            },
+                                        contentScale = ContentScale.Crop,
+                                        loading = {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                color = androidx.compose.material.MaterialTheme.colors.primaryVariant
+                                            )
+                                        },
+                                        filterQuality = FilterQuality.Medium,
+                                    )
+                                    Spacer(modifier = Modifier.width(Padding.small))
+                                    Text(
+                                        text = item.category,
                                         fontFamily = lemonMilkFonts,
                                         fontWeight = FontWeight.Normal,
                                         modifier = Modifier

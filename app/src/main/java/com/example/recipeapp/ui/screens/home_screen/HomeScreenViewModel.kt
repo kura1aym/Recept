@@ -24,6 +24,10 @@ class HomeScreenViewModel @Inject constructor(
         mutableStateOf<ComponentPopularPicksState>(ComponentPopularPicksState())
     val popularPicks = popularPicksState as State<ComponentPopularPicksState>
 
+    private val _categoriesState =
+        mutableStateOf<ComponentCategoriesState>(ComponentCategoriesState())
+    val categoriesState: State<ComponentCategoriesState> = _categoriesState
+
     private val _uiEvents = Channel<HomeScreenUiEvents>()
         val uiEvents = _uiEvents.receiveAsFlow()
 
@@ -31,6 +35,7 @@ class HomeScreenViewModel @Inject constructor(
         init {
             viewModelScope.launch {
                 async { loadPopularPicks(fetchFromRemote = false)
+                    async { loadCategories() }
                 }
             }
         }
@@ -38,8 +43,8 @@ class HomeScreenViewModel @Inject constructor(
         private suspend fun loadPopularPicks(fetchFromRemote: Boolean) {
             when (val recipeState = recipeRepository.getFirstFourRecipes(fetchFromRemote = fetchFromRemote)) {
                 is Resource.Error -> {
-                    val errorMessage = recipeState.error?.toString() ?: "recipes"
-                    popularPicksState.value = popularPicksState.value.copy(error = errorMessage, loading = false)
+                    popularPicksState.value =
+                        popularPicksState.value.copy(error = "unable to load recipes", loading = false)
                 }
                 is Resource.Loading -> {
                     popularPicksState.value = popularPicksState.value.copy(error = "", loading = true)
@@ -54,7 +59,28 @@ class HomeScreenViewModel @Inject constructor(
             }
         }
 
-    fun sendUiEvents(event: HomeScreenUiEvents){
+    private suspend fun loadCategories() {
+        recipeRepository.getCategories().collectLatest { result ->
+            when (result) {
+                is Resource.Error -> {
+                    _categoriesState.value = _categoriesState.value.copy(
+                        isLoading = false,
+                        error = result.error ?: "unable to load categories please try again later"
+                    )
+                }
+                is Resource.Loading -> {
+                    _categoriesState.value = _categoriesState.value.copy(isLoading = true)
+                }
+                is Resource.Success -> {
+                    _categoriesState.value = _categoriesState.value.copy(isLoading = false, categories = result.data ?: emptyList())
+                }
+            }
+        }
+    }
+
+
+
+        fun sendUiEvents(event: HomeScreenUiEvents){
             viewModelScope.launch {
                 when(event){
                     HomeScreenUiEvents.CloseNavDrawer -> {
