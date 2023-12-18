@@ -84,7 +84,7 @@ class RecipeScreenViewModel @Inject constructor(
                 is Resource.Success -> {
                     _recipeState.value = _recipeState.value.copy(
                         isLoading = false,
-                   //     recipe = recipeResult.data?.toRecipeDtoItem() ?: RecipeDtoItem()
+                      recipe = recipeResult.data?.toRecipeDtoItem() ?: RecipeDtoItem()
                     )
                 }
             }
