@@ -2,9 +2,9 @@ package com.example.recipeapp.data.remote.repository
 
 import android.util.Log
 import com.example.recipeapp.core.Resource
+import com.example.recipeapp.data.local.RecipeDatabase
 import com.example.recipeapp.data.local.RecipeEntity
 import com.example.recipeapp.data.mapper.toRecipeDtoItem
-import com.example.recipeapp.data.local.RecipeDatabase
 import com.example.recipeapp.data.mapper.toRecipeEntity
 import com.example.recipeapp.data.remote.RecipeApi
 import com.example.recipeapp.data.remote.dto.categories.CategoryDtoItem
@@ -19,7 +19,7 @@ class RecipeRepositoryImpl @Inject constructor(
     private val recipeDatabase: RecipeDatabase
 ) : RecipeRepository {
     private val recipeDao = recipeDatabase.dao
-    override suspend fun getFirstFourRecipes(): Resource<List<RecipeDtoItem>> {
+    override suspend fun getFirstFourRecipes(fetchFromRemote: Boolean): Resource<List<RecipeDtoItem>> {
         try {
             val shouldJustLoadFromCache = recipeDao.searchRecipe("").isNotEmpty()
             val myRecipes: List<RecipeEntity> = if (!shouldJustLoadFromCache) {
