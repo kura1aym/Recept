@@ -1,4 +1,4 @@
-package com.example.recipeapp.model
+package com.example.recipeapp.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
