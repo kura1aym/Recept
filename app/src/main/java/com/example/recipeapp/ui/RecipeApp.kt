@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +23,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun RecipeApp() {
+fun RecipeApp(
+    windowSize: WindowWidthSizeClass
+) {
     val permissionState =
         rememberMultiplePermissionsState(
             permissions = listOf(
@@ -41,7 +44,10 @@ fun RecipeApp() {
             startDestination = Screen.HomeScreen.route
         ) {
             composable(route = Screen.HomeScreen.route) {
-                HomeScreen(navController = navController) {
+                HomeScreen(
+                    navController = navController,
+                    windowSize = windowSize
+                ) {
                 }
             }
             composable(route = Screen.CategoriesScreen.route){
