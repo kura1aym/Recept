@@ -26,6 +26,7 @@ interface RecipeRepository {
         page: Int,
         pageSize: Int,
         fetchFromRemote: Boolean,
+        getSavedRecipes: Boolean,
     ): Resource<List<RecipeDtoItem>>
 
     suspend fun getSavedRecipes(): Resource<List<ModelLocalRecipe>>
