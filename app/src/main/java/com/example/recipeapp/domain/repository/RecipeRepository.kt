@@ -3,14 +3,16 @@ package com.example.recipeapp.domain.repository
 import com.example.recipeapp.core.Resource
 import com.example.recipeapp.data.remote.dto.categories.CategoryDtoItem
 import com.example.recipeapp.data.remote.dto.recipes.RecipeDtoItem
+import com.example.recipeapp.domain.model.Recipe
 import kotlinx.coroutines.flow.Flow
+
 
 interface RecipeRepository {
     suspend fun getRecipes(
         recipe: String,
         page: Int,
         pageSize: Int,
-        fetchFromRemote: Boolean
+        fetchFromRemote: Boolean,
     ): Resource<List<RecipeDtoItem>>
 
     suspend fun getFirstFourRecipes(fetchFromRemote: Boolean): Resource<List<RecipeDtoItem>>
@@ -25,5 +27,14 @@ interface RecipeRepository {
         page: Int,
         pageSize: Int,
         fetchFromRemote: Boolean,
+        getSavedRecipes: Boolean,
     ): Resource<List<RecipeDtoItem>>
+
+    suspend fun getSavedRecipes(): Resource<List<Recipe>>
+
+    suspend fun saveRecipe(recipeDtoItem: RecipeDtoItem): Resource<String>
+
+    suspend fun getLocalRecipeByTitle(title: String): Resource<Recipe?>
+
+    suspend fun deleteSelectedSavedRecipes(recipeTitles: List<String>): String
 }

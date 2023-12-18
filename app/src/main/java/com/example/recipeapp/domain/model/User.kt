@@ -1,4 +1,4 @@
-package com.example.recipeapp.model
+package com.example.recipeapp.domain.model
 
 data class User(
     val userId: String,

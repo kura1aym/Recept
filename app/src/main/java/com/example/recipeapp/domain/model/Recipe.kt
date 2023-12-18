@@ -1,4 +1,4 @@
-package com.example.recipeapp.model
+package com.example.recipeapp.domain.model
 
 import com.example.recipeapp.data.remote.dto.recipes.Ingredient
 

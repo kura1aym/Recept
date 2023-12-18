@@ -33,7 +33,7 @@ fun RecipeApp() {
     val navController = rememberNavController()
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.background
     ) {
         NavHost(
             navController = navController,

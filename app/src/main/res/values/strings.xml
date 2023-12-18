@@ -6,4 +6,5 @@
     <string name="menu_icon_description">open menu</string>
     <string name="search_icon_description">search recipes</string>
     <string name="main_phrase">Discover, Cook, and Savor: Your Culinary Adventure Starts Here!</string>
+    <string name="popular_recipes">Popular Picks</string>
 </resources>

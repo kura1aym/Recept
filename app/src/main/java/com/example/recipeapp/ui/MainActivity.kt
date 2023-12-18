@@ -25,10 +25,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             RecipeAppTheme {
                 // A surface container using the 'background' color from the theme
-                SetBarColor(color = MaterialTheme.colorScheme.primary)
+                SetBarColor(color = MaterialTheme.colorScheme.background)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     RecipeApp()
                 }
