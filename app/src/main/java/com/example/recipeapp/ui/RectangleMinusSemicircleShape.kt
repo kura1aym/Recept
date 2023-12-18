@@ -27,16 +27,16 @@ class RectangleMinusSemicircleShape : Shape {
         val rectHeight = size.height/2
 
         val path = Path().apply {
-            moveTo(0f, 0f)
-            lineTo(size.width, 0f)
+            moveTo(-10f, 0f)
+            lineTo(size.width + 10f, 0f)
             lineTo(size.width, rectHeight)
 
             arcTo(
                 rect = Rect(
                     left = 0f,
-                    top = size.height - rectHeight - cornerRadius, // Изменяем координату top
+                    top = size.height - rectHeight - cornerRadius,
                     right = size.width,
-                    bottom = size.height - cornerRadius // Изменяем координату bottom
+                    bottom = size.height - cornerRadius
                 ),
                 startAngleDegrees = 0f,
                 sweepAngleDegrees = -180f,
