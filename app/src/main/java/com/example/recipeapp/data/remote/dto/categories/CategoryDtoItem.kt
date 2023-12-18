@@ -1,3 +1,6 @@
 package com.example.recipeapp.data.remote.dto.categories
 
-class CategoryDto : ArrayList<CategoryDtoItem>()
+data class CategoryDtoItem(
+    val category: String = "",
+    val imageUrl: String = ""
+)

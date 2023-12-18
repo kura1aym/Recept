@@ -1,6 +1,8 @@
 package com.example.recipeapp.domain.repository
 
 import com.example.recipeapp.core.Resource
+import com.example.recipeapp.data.local.LocalRecipeEntity
+import com.example.recipeapp.data.local.RecipeEntity
 import com.example.recipeapp.data.remote.dto.categories.CategoryDtoItem
 import com.example.recipeapp.data.remote.dto.recipes.RecipeDtoItem
 import com.example.recipeapp.model.ModelLocalRecipe
@@ -11,10 +13,10 @@ interface RecipeRepository {
         recipe: String,
         page: Int,
         pageSize: Int,
-        fetchFromRemote: Boolean
+        fetchFromRemote: Boolean,
     ): Resource<List<RecipeDtoItem>>
 
-    suspend fun getFirstFourRecipes(): Resource<List<RecipeDtoItem>>
+    suspend fun getFirstFourRecipes(fetchFromRemote: Boolean): Resource<List<RecipeDtoItem>>
 
     suspend fun getRecipeByTitle(title: String, category: String): Flow<Resource<RecipeDtoItem>>
 
