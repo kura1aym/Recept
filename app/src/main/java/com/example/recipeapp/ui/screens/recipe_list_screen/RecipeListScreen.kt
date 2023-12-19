@@ -39,11 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.recipeapp.core.Padding
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 //import com.example.recipeapp.core.MyPadding
 import com.example.recipeapp.core.Screen
 import com.example.recipeapp.core.lemonMilkFonts
+import com.example.recipeapp.ui.RectangleMinusSemicircleShape
 //import com.example.recipeapp.ui.custom_view.CustomShape
 import kotlinx.coroutines.flow.collectLatest
 import java.net.URLEncoder
@@ -132,7 +134,10 @@ fun RecipeListUi(
     keyboardController: SoftwareKeyboardController?,
     state: RecipeListScreenState,
 ){
-    Scaffold(scaffoldState = scaffoldState) {padding ->
+    Scaffold(
+        scaffoldState = scaffoldState,
+        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+    ) {padding ->
         LazyColumn(modifier = Modifier.fillMaxSize()){
             item {
                 Box(
@@ -141,7 +146,7 @@ fun RecipeListUi(
                         .height(LocalConfiguration.current.screenHeightDp.dp / 2)
                         .graphicsLayer {
                             shadowElevation = 8.dp.toPx()
-          //                  shape = CustomShape()
+                            shape = RectangleMinusSemicircleShape()
                             clip = true
                         }
                         .drawBehind {
@@ -164,7 +169,7 @@ fun RecipeListUi(
                             .graphicsLayer {
                                 this.alpha = 0.25f
                                 shadowElevation = 8.dp.toPx()
-//                                shape = CustomShape()
+                                shape = RectangleMinusSemicircleShape()
                                 clip = true
                             }
                             .align(Alignment.Center),
@@ -188,11 +193,12 @@ fun RecipeListUi(
                                         FromRecipeListScreenEvents.DeleteButtonClicked
                                     )
                                 },
-              //                  modifier = Modifier.padding(MyPadding.small)
+                               modifier = Modifier.padding(Padding.small)
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Delete,
-                                    contentDescription = "goto home screen"
+                                    contentDescription = "goto home screen",
+                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background
                                 )
                             }
                         }
@@ -205,19 +211,23 @@ fun RecipeListUi(
                             ) {
                                 IconButton(
                                     onClick = { navController.navigateUp() },
-                    //                modifier = Modifier.padding(MyPadding.small)
+                                    modifier = Modifier.padding(Padding.small)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = "goto home screen"
+                                        contentDescription = "goto home screen",
+                                        tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                        modifier = Modifier.size(40.dp)
                                     )
                                 }
-               //                 Spacer(modifier = Modifier.width(MyPadding.medium))
+                                Spacer(modifier = Modifier.width(Padding.medium))
                                 AnimatedVisibility(visible = !showSearchBoxState.value) {
                                     IconButton(onClick = { showSearchBoxState.value = true }) {
                                         Icon(
                                             imageVector = Icons.Default.Search,
-                                            contentDescription = "search recipe"
+                                            contentDescription = "search recipe",
+                                            tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                            modifier = Modifier.size(40.dp)
                                         )
                                     }
                                 }
@@ -225,22 +235,26 @@ fun RecipeListUi(
                                     OutlinedTextField(
                                         value = searchBoxState,
                                         onValueChange = viewModel::onSearchBoxValueChanged,
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary, // Color when the text field is focused
+                                            unfocusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.background, // Color when the text field is not focused
+                                            textColor = androidx.compose.material3.MaterialTheme.colorScheme.background, // Text color
+                                            cursorColor = androidx.compose.material3.MaterialTheme.colorScheme.primary // Color of the cursor
+                                        ),
                                         modifier = Modifier
                                             .fillMaxWidth(0.8f),
-//                                .focusRequester(focusRequester = focusRequester),
                                         label = {
-                                            Text("Search ${viewModel.category.value} recipes")
+                                            Text("Search ${viewModel.category.value} recipes", color = androidx.compose.material3.MaterialTheme.colorScheme.background)
                                         },
                                         placeholder = {
-                                            Text("Search ${viewModel.category.value} recipes")
+                                            Text("Search ${viewModel.category.value} recipes", color = androidx.compose.material3.MaterialTheme.colorScheme.background)
                                         },
                                         keyboardActions = KeyboardActions(onSearch = {
                                             keyboardController?.hide()
-//                                showSearchBoxState.value = false
                                         }),
                                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                                     )
-                     //               Spacer(modifier = Modifier.width(MyPadding.medium))
+                                    Spacer(modifier = Modifier.width(Padding.medium))
 
                                 }
                                 AnimatedVisibility(visible = showSearchBoxState.value) {
@@ -266,7 +280,7 @@ fun RecipeListUi(
                         style = MaterialTheme.typography.h4,
                         fontWeight = FontWeight.ExtraLight,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colors.onSurface,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.background,
                         fontFamily = lemonMilkFonts,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -277,7 +291,6 @@ fun RecipeListUi(
                 Log.d("HomeScreen", "item size is ${state.items.size} and index is $index")
                 val item = state.items[index]
 
-                // below statement is a part of side effect
                 LaunchedEffect(key1 = Unit) {
                     if (index >= state.items.size - 5 && !state.endReached && !state.isLoading) {
                         Log.d("recipelistscreen", "entered if statement")
@@ -288,7 +301,7 @@ fun RecipeListUi(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                 //       .padding(MyPadding.small)
+                       .padding(Padding.small)
                         .combinedClickable(onLongClick = {
                             if (!isEditModeOn && viewModel.getSavedRecipes.value) {
                                 viewModel.isEditModeOn.value = true
@@ -315,10 +328,8 @@ fun RecipeListUi(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height((0.8f * 250).dp)
-//                            .fillMaxHeight(0.8f)
                             .graphicsLayer {
-//                            alpha = if(isEditModeOn) 0.7f else 1.0f
-                      //         shape = RoundedCornerShape(MyPadding.medium)
+                             shape = RoundedCornerShape(Padding.medium)
                                 clip = true
                             },
                         contentScale = ContentScale.Crop,
@@ -339,7 +350,6 @@ fun RecipeListUi(
                             fontWeight = FontWeight.Normal,
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)
-//                                .animateItemPlacement(tween(300))
                         )
                         AnimatedVisibility(isEditModeOn) {
                             RadioButton(

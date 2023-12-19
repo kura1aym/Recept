@@ -308,7 +308,7 @@ fun HomeScreen(
                                                         }
                                                     }
                                                     .background(
-                                                        color = MaterialTheme.colorScheme.background,
+                                                        color = MaterialTheme.colorScheme.primary,
                                                         shape = RoundedCornerShape(8.dp)
                                                     )
                                             )
@@ -422,7 +422,7 @@ fun HomeScreen(
                                                         ) { launchSingleTop = true }
                                                     }
                                                     .background(
-                                                        color = MaterialTheme.colorScheme.background,
+                                                        color = MaterialTheme.colorScheme.primary,
                                                         shape = RoundedCornerShape(8.dp)
                                                     )
                                             )

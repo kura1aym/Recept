@@ -18,12 +18,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.recipeapp.R
 import com.example.recipeapp.core.Padding
 import com.example.recipeapp.core.Screen
 import com.example.recipeapp.core.lemonMilkFonts
@@ -41,19 +43,20 @@ fun CategoriesScreen(
     val categoriesListState = categoriesScreenViewModel.categoryListState.value
 
     Scaffold(
+        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Categories", color = Color.White)
+                    Text(stringResource(R.string.categories), color = androidx.compose.material3.MaterialTheme.colorScheme.onTertiary)
                 },
-                backgroundColor = Color(0xFF911A17),
+                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
                 navigationIcon = {
                     IconButton(
                         onClick = {
                             navController.navigateUp()
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onTertiary)
                     }
                 }
             )
@@ -126,6 +129,10 @@ fun CategoryItem(
             .fillMaxWidth()
             .fillMaxHeight()
             .align(Alignment.BottomCenter)
+            .graphicsLayer {
+                shape = RoundedCornerShape(Padding.medium)
+                clip = true
+            }
             .drawBehind {
                 drawRect(Brush.verticalGradient(colors = immutableListOf(Color.Transparent,
                     Color.Black)), alpha = 0.7f)
@@ -138,6 +145,7 @@ fun CategoryItem(
         ) {
             Text(
                 text = categoryDtoItem.category,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.background,
                 fontFamily = lemonMilkFonts,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier

@@ -55,10 +55,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.recipeapp.R
+import com.example.recipeapp.core.Padding
 import com.example.recipeapp.data.remote.dto.recipes.Ingredient
-// import com.example.recipeapp.ui.custom_view.CustomShape
+import com.example.recipeapp.ui.RectangleMinusSemicircleShape
 import com.example.recipeapp.ui.screens.recipe_screen.components.ingredientToPDF
-// import com.example.recipeapp.ui.theme.MyPadding
 import com.example.recipeapp.ui.theme.lemonMilkFonts
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -117,7 +117,10 @@ fun RecipeScreen(
             }
         }
         else -> {
-            Scaffold(scaffoldState = scaffoldState){padding->
+            Scaffold(
+                scaffoldState = scaffoldState,
+                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+            ){padding->
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
 
                     item {
@@ -127,7 +130,7 @@ fun RecipeScreen(
                                 .height(LocalConfiguration.current.screenHeightDp.dp / 2)
                                 .graphicsLayer {
                                     shadowElevation = 8.dp.toPx()
-          ///                         shape = CustomShape()
+                                    shape = RectangleMinusSemicircleShape()
                                     clip = true
                                 }
                                 .drawBehind {
@@ -149,6 +152,8 @@ fun RecipeScreen(
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
                                         contentDescription = "goto home screen",
+                                        tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                        modifier = Modifier.size(40.dp)
                                     )
                                 }
 
@@ -171,8 +176,12 @@ fun RecipeScreen(
                                         }
 
                                     }) {
-                                        Icon(imageVector = Icons.Default.DownloadForOffline,
-                                            contentDescription = "download recipe")
+                                        Icon(
+                                            imageVector = Icons.Default.DownloadForOffline,
+                                            contentDescription = "download recipe",
+                                            tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                            modifier = Modifier.size(40.dp)
+                                        )
                                     }
 
                                     IconButton(
@@ -195,7 +204,8 @@ fun RecipeScreen(
                                                 }
                                             },
                                             contentDescription = "Save Recipe",
-                                            tint = if (favoriteButtonState == RecipeSaveState.NOT_SAVED) Color.White else Color.Red
+                                            tint = if (favoriteButtonState == RecipeSaveState.NOT_SAVED) Color.White else Color.Red,
+                                            modifier = Modifier.size(40.dp)
                                         )
                                     }
                                 }
@@ -241,7 +251,7 @@ fun RecipeScreen(
                                 fontWeight = FontWeight.Medium,
                                 style = MaterialTheme.typography.h6,
                               modifier = Modifier
-                                //  .padding(horizontal = MyPadding.medium)
+                              .padding(horizontal = Padding.medium)
                                     .clickable{
                                         if (multiplePermissionState.shouldShowRationale) {
                                             viewModel.sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar(
@@ -257,7 +267,7 @@ fun RecipeScreen(
 
                                     }
                             )
-                       //   Spacer(modifier = Modifier.height(MyPadding.medium))
+                           Spacer(modifier = Modifier.height(Padding.medium))
                             IconButton(onClick = {
                                 if (multiplePermissionState.shouldShowRationale) {
                                     viewModel.sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar(
@@ -275,7 +285,7 @@ fun RecipeScreen(
                                     contentDescription = "download recipe")
                             }
                         }
-                //        Spacer(modifier = Modifier.height(MyPadding.medium))
+                       Spacer(modifier = Modifier.height(Padding.medium))
                     }
 
                     item {
@@ -283,7 +293,7 @@ fun RecipeScreen(
                             currentValue = numberOfPersons,
                             modifier = Modifier
                                 .fillMaxWidth()
-               //                 .padding(horizontal = MyPadding.medium)
+                             .padding(horizontal = Padding.medium)
                         ) {
                             viewModel.onSliderValueChanged(it)
                             Log.d("recipescreen", "number of persons $numberOfPersons")
@@ -296,9 +306,9 @@ fun RecipeScreen(
                             fontFamily = lemonMilkFonts,
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.h4,
-                //            modifier = Modifier.padding(horizontal = MyPadding.medium)
+                            modifier = Modifier.padding(horizontal = Padding.medium)
                         )
-               //         Spacer(modifier = Modifier.height(MyPadding.medium))
+                      Spacer(modifier = Modifier.height(Padding.medium))
                     }
 
 
@@ -316,9 +326,9 @@ fun RecipeScreen(
                             fontFamily = lemonMilkFonts,
                             fontWeight = FontWeight.Normal,
                             style = MaterialTheme.typography.body1,
-               //             modifier = Modifier.padding(horizontal = MyPadding.medium)
+                            modifier = Modifier.padding(horizontal = Padding.medium)
                         )
-                  //      Spacer(modifier = Modifier.height(MyPadding.medium))
+                       Spacer(modifier = Modifier.height(Padding.medium))
                     }
 
                     item {
@@ -327,9 +337,9 @@ fun RecipeScreen(
                             fontFamily = lemonMilkFonts,
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.h4,
-                     //       modifier = Modifier.padding(horizontal = MyPadding.medium)
+                            modifier = Modifier.padding(horizontal = Padding.medium)
                         )
-                 //       Spacer(modifier = Modifier.height(MyPadding.medium))
+                        Spacer(modifier = Modifier.height(Padding.medium))
                     }
 
                     items(screenState.recipe.method) { method ->
@@ -338,9 +348,9 @@ fun RecipeScreen(
                             fontFamily = lemonMilkFonts,
                             fontWeight = FontWeight.Normal,
                             style = MaterialTheme.typography.body1,
-                   //         modifier = Modifier.padding(horizontal = MyPadding.medium)
+                            modifier = Modifier.padding(horizontal = Padding.medium)
                         )
-                  //      Spacer(modifier = Modifier.height(MyPadding.medium))
+                        Spacer(modifier = Modifier.height(Padding.medium))
                     }
                 }
             }
@@ -357,7 +367,7 @@ fun exportPdf(context: Context, ingredients: List<Ingredient>, viewModel: Recipe
     if (Build.VERSION.SDK_INT > 29) {
         val resolver = context.contentResolver
         val values = ContentValues()
-        // save to a folder
+
         values.put(
             MediaStore.MediaColumns.DISPLAY_NAME,
             "${viewModel.recipeState.value.recipe.title}.pdf")
@@ -430,7 +440,6 @@ fun NumberOfPersonSlider(
             fontFamily = lemonMilkFonts,
             style = MaterialTheme.typography.h5)
         Row(
-//            modifier = modifier,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -443,7 +452,6 @@ fun NumberOfPersonSlider(
                     activeTrackColor = MaterialTheme.colors.primaryVariant,
                 )
             )
-//            Spacer(modifier = Modifier.width(MyPadding.small))
             Text(text = "$currentValue", modifier = Modifier.fillMaxWidth())
         }
     }
