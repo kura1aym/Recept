@@ -67,7 +67,8 @@ fun RecipeApp(
                         type = NavType.BoolType
                     },
                 )) {
-                RecipeScreen(navController = navController)
+                RecipeScreen(navController = navController,
+                    windowSize = windowSize)
             }
 
             composable(route = Screen.CategoriesScreen.route){
@@ -88,10 +89,12 @@ fun RecipeApp(
                     navArgument(name = Constants.RECIPE_SCREEN_SHOULD_LOAD_FROM_SAVED_RECIPES)
                     {
                         type = NavType.BoolType
-                    },
+                   },
                 )
             ) {
-                RecipeListScreen(navController = navController)
+                RecipeListScreen(navController = navController,
+                    windowSize = windowSize
+                )
             }
         }
     }
