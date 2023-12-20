@@ -314,7 +314,7 @@ fun RecipeListUi(
                         LaunchedEffect(key1 = Unit) {
                             if (index >= state.items.size - 5 && !state.endReached && !state.isLoading) {
                                 Log.d("recipelistscreen", "entered if statement")
-                                viewModel.loadNextItems()
+                               viewModel.loadNextItems()
                             }
                         }
                         Column(
@@ -635,8 +635,10 @@ fun RecipeListUi(
                                     modifier = Modifier
                                       .width(500.dp),
 
+
+
                                     style = androidx.compose.ui.text.TextStyle(
-                                        fontSize = 35.sp // Set the desired font size here
+                                        fontSize = 30.sp // Set the desired font size here
                                     )
                                 )
                                 AnimatedVisibility(isEditModeOn) {

@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +36,7 @@ import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -65,12 +65,14 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 import java.io.FileOutputStream
+import androidx.compose.foundation.layout.Row as Row
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RecipeScreen(
     navController: NavHostController,
     viewModel: RecipeScreenViewModel = hiltViewModel(),
+    windowSize : WindowWidthSizeClass
 
     ){
 
@@ -117,247 +119,539 @@ fun RecipeScreen(
             }
         }
         else -> {
-            Scaffold(
-                scaffoldState = scaffoldState,
-                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
-            ){padding->
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+            when (windowSize) {
+                WindowWidthSizeClass.Medium -> {
+                    Scaffold(
+                        scaffoldState = scaffoldState,
+                        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+                    ) { padding ->
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
 
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(LocalConfiguration.current.screenHeightDp.dp / 2)
-                                .graphicsLayer {
-                                    shadowElevation = 8.dp.toPx()
-                                    shape = RectangleMinusSemicircleShape()
-                                    clip = true
-                                }
-                                .drawBehind {
-                                    drawRect(color = Color(0xFF000000))
-                                },
-                        ){
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.TopCenter)
-                                    .drawBehind { drawRect(color = Color.Transparent) },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                IconButton(
-                                    onClick = {navController.navigateUp()  },
-                                    modifier = Modifier.padding(4.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = "goto home screen",
-                                        tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                }
-
-                                Row(
+                            item {
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .height(LocalConfiguration.current.screenHeightDp.dp / 2)
+                                        .graphicsLayer {
+                                            shadowElevation = 8.dp.toPx()
+                                            shape = RectangleMinusSemicircleShape()
+                                            clip = true
+                                        }
+                                        .drawBehind {
+                                            drawRect(color = Color(0xFF000000))
+                                        },
                                 ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .align(Alignment.TopCenter)
+                                            .drawBehind { drawRect(color = Color.Transparent) },
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        IconButton(
+                                            onClick = { navController.navigateUp() },
+                                            modifier = Modifier.padding(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowBack,
+                                                contentDescription = "goto home screen",
+                                                tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
 
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+
+                                            IconButton(onClick = {
+                                                if (multiplePermissionState.shouldShowRationale) {
+                                                    viewModel.sendRecipeScreenUiEvent(
+                                                        RecipeScreenEvents.ShowSnackbar(
+                                                            "Please provide storage permission to continue"
+                                                        )
+                                                    )
+                                                } else if (!multiplePermissionState.allPermissionsGranted) {
+                                                    multiplePermissionState.launchMultiplePermissionRequest()
+                                                } else {
+                                                    exportPdf(
+                                                        context = context,
+                                                        ingredients = ingredients,
+                                                        viewModel = viewModel,
+                                                        name = screenState.recipe.title
+                                                    )
+                                                }
+
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.DownloadForOffline,
+                                                    contentDescription = "download recipe",
+                                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                    modifier = Modifier.size(40.dp)
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = viewModel::onSaveRecipeButtonClicked,
+                                            ) {
+                                                Icon(
+                                                    imageVector =
+                                                    when (favoriteButtonState) {
+                                                        RecipeSaveState.NOT_SAVED -> {
+                                                            Icons.Outlined.Favorite
+                                                        }
+
+                                                        RecipeSaveState.ALREADY_EXISTS -> {
+                                                            Icons.Default.Favorite
+                                                        }
+
+                                                        RecipeSaveState.SAVED -> {
+                                                            Icons.Default.Favorite
+                                                        }
+
+                                                        else -> {
+                                                            Icons.Outlined.Favorite
+                                                        }
+                                                    },
+                                                    contentDescription = "Save Recipe",
+                                                    tint = if (favoriteButtonState == RecipeSaveState.NOT_SAVED) Color.White else Color.Red,
+                                                    modifier = Modifier.size(40.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    SubcomposeAsyncImage(
+                                        model = screenState.recipe.imageUrl,
+                                        loading = {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(50.dp),
+                                                color = MaterialTheme.colors.primaryVariant
+                                            )
+                                        },
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer {
+                                                this.alpha = 0.25f
+                                                shadowElevation = 8.dp.toPx()
+                                                clip = true
+                                            }
+                                            .align(Alignment.Center),
+                                        contentScale = ContentScale.Crop,
+                                        filterQuality = FilterQuality.Medium
+                                    )
+                                    Text(
+                                        text = "",
+                                        style = MaterialTheme.typography.h4,
+                                        fontWeight = FontWeight.ExtraLight,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colors.onSurface,
+                                        fontFamily = lemonMilkFonts,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Download Ingredients",
+                                        fontFamily = lemonMilkFonts,
+                                        fontWeight = FontWeight.Medium,
+                                        style = MaterialTheme.typography.h6,
+                                        modifier = Modifier
+                                            .padding(horizontal = Padding.medium)
+                                            .clickable {
+                                                if (multiplePermissionState.shouldShowRationale) {
+                                                    viewModel.sendRecipeScreenUiEvent(
+                                                        RecipeScreenEvents.ShowSnackbar(
+                                                            "Please provide storage permission to continue"
+                                                        )
+                                                    )
+                                                } else if (!multiplePermissionState.allPermissionsGranted) {
+                                                    multiplePermissionState.launchMultiplePermissionRequest()
+                                                } else {
+                                                    exportPdf(
+                                                        context = context,
+                                                        ingredients = ingredients,
+                                                        viewModel = viewModel,
+                                                        name = screenState.recipe.title
+                                                    )
+                                                }
+
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.height(Padding.medium))
                                     IconButton(onClick = {
                                         if (multiplePermissionState.shouldShowRationale) {
-                                            viewModel.sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar(
-                                                "Please provide storage permission to continue"))
+                                            viewModel.sendRecipeScreenUiEvent(
+                                                RecipeScreenEvents.ShowSnackbar(
+                                                    "Please provide storage permission to continue"
+                                                )
+                                            )
                                         } else if (!multiplePermissionState.allPermissionsGranted) {
                                             multiplePermissionState.launchMultiplePermissionRequest()
                                         } else {
-                                            exportPdf(context = context, ingredients = ingredients, viewModel = viewModel, name = screenState.recipe.title)
+                                            exportPdf(
+                                                context = context,
+                                                ingredients = ingredients,
+                                                viewModel = viewModel,
+                                                name = screenState.recipe.title
+                                            )
                                         }
-
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.DownloadForOffline,
-                                            contentDescription = "download recipe",
-                                            tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
-                                            modifier = Modifier.size(40.dp)
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = viewModel::onSaveRecipeButtonClicked,
-                                    ) {
-                                        Icon(
-                                            imageVector =
-                                            when (favoriteButtonState) {
-                                                RecipeSaveState.NOT_SAVED -> {
-                                                    Icons.Outlined.Favorite
-                                                }
-                                                RecipeSaveState.ALREADY_EXISTS -> {
-                                                    Icons.Default.Favorite
-                                                }
-                                                RecipeSaveState.SAVED -> {
-                                                    Icons.Default.Favorite
-                                                }
-                                                else -> {
-                                                    Icons.Outlined.Favorite
-                                                }
-                                            },
-                                            contentDescription = "Save Recipe",
-                                            tint = if (favoriteButtonState == RecipeSaveState.NOT_SAVED) Color.White else Color.Red,
-                                            modifier = Modifier.size(40.dp)
+                                            contentDescription = "download recipe"
                                         )
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(Padding.medium))
                             }
 
-                            SubcomposeAsyncImage(
-                                model = screenState.recipe.imageUrl,
-                                loading = {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(50.dp),
-                                        color = MaterialTheme.colors.primaryVariant
-                                    )
-                                },
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .graphicsLayer {
-                                        this.alpha = 0.25f
-                                        shadowElevation = 8.dp.toPx()
-                                        clip = true
-                                    }
-                                    .align(Alignment.Center),
-                                contentScale = ContentScale.Crop,
-                                filterQuality = FilterQuality.Medium
-                            )
-                            Text(
-                                text = "",
-                                style = MaterialTheme.typography.h4,
-                                fontWeight = FontWeight.ExtraLight,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colors.onSurface,
-                                fontFamily = lemonMilkFonts,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
+                            item {
+                                NumberOfPersonSlider(
+                                    currentValue = numberOfPersons,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = Padding.medium)
+                                ) {
+                                    viewModel.onSliderValueChanged(it)
+                                    Log.d("recipescreen", "number of persons $numberOfPersons")
+                                }
+                            }
+
+                            item {
+                                Text(
+                                    text = "Ingredients",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.h4,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+
+
+                            items(ingredients) { ingredient ->
+                                val ingredientQuantity = ingredient.quantity.toFloatOrNull()
+                                    ?.times(viewModel.numberOfPersons.value)
+                                val modifiedIngredient = if (ingredientQuantity == null) {
+                                    ""
+                                } else {
+                                    "$ingredientQuantity "
+                                }
+                                Text(
+                                    text = " ${modifiedIngredient}${ingredient.description}",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Normal,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+                            item {
+                                Text(
+                                    text = "Method",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.h4,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+                            items(screenState.recipe.method) { method ->
+                                Text(
+                                    text = method,
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Normal,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
                         }
                     }
+                }
 
-                    item {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
-                            Text(
-                                text = "Download Ingredients",
-                                fontFamily = lemonMilkFonts,
-                                fontWeight = FontWeight.Medium,
-                                style = MaterialTheme.typography.h6,
-                              modifier = Modifier
-                              .padding(horizontal = Padding.medium)
-                                    .clickable{
+                else -> {
+                    Scaffold(
+                        scaffoldState = scaffoldState,
+                        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+                    ) { padding ->
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(LocalConfiguration.current.screenHeightDp.dp / 2)
+                                        .graphicsLayer {
+                                            shadowElevation = 8.dp.toPx()
+                                            shape = RectangleMinusSemicircleShape()
+                                            clip = true
+                                        }
+                                        .drawBehind {
+                                            drawRect(color = Color(0xFF000000))
+                                        },
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .align(Alignment.TopCenter)
+                                            .drawBehind { drawRect(color = Color.Transparent) },
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        IconButton(
+                                            onClick = { navController.navigateUp() },
+                                            modifier = Modifier.padding(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowBack,
+                                                contentDescription = "goto home screen",
+                                                tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+
+                                            IconButton(onClick = {
+                                                if (multiplePermissionState.shouldShowRationale) {
+                                                    viewModel.sendRecipeScreenUiEvent(
+                                                        RecipeScreenEvents.ShowSnackbar(
+                                                            "Please provide storage permission to continue"
+                                                        )
+                                                    )
+                                                } else if (!multiplePermissionState.allPermissionsGranted) {
+                                                    multiplePermissionState.launchMultiplePermissionRequest()
+                                                } else {
+                                                    exportPdf(
+                                                        context = context,
+                                                        ingredients = ingredients,
+                                                        viewModel = viewModel,
+                                                        name = screenState.recipe.title
+                                                    )
+                                                }
+
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.DownloadForOffline,
+                                                    contentDescription = "download recipe",
+                                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                    modifier = Modifier.size(40.dp)
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = viewModel::onSaveRecipeButtonClicked,
+                                            ) {
+                                                Icon(
+                                                    imageVector =
+                                                    when (favoriteButtonState) {
+                                                        RecipeSaveState.NOT_SAVED -> {
+                                                            Icons.Outlined.Favorite
+                                                        }
+
+                                                        RecipeSaveState.ALREADY_EXISTS -> {
+                                                            Icons.Default.Favorite
+                                                        }
+
+                                                        RecipeSaveState.SAVED -> {
+                                                            Icons.Default.Favorite
+                                                        }
+
+                                                        else -> {
+                                                            Icons.Outlined.Favorite
+                                                        }
+                                                    },
+                                                    contentDescription = "Save Recipe",
+                                                    tint = if (favoriteButtonState == RecipeSaveState.NOT_SAVED) Color.White else Color.Red,
+                                                    modifier = Modifier.size(40.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    SubcomposeAsyncImage(
+                                        model = screenState.recipe.imageUrl,
+                                        loading = {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(50.dp),
+                                                color = MaterialTheme.colors.primaryVariant
+                                            )
+                                        },
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer {
+                                                this.alpha = 0.25f
+                                                shadowElevation = 8.dp.toPx()
+                                                clip = true
+                                            }
+                                            .align(Alignment.Center),
+                                        contentScale = ContentScale.Crop,
+                                        filterQuality = FilterQuality.Medium
+                                    )
+                                    Text(
+                                        text = "",
+                                        style = MaterialTheme.typography.h4,
+                                        fontWeight = FontWeight.ExtraLight,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colors.onSurface,
+                                        fontFamily = lemonMilkFonts,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Download Ingredients",
+                                        fontFamily = lemonMilkFonts,
+                                        fontWeight = FontWeight.Medium,
+                                        style = MaterialTheme.typography.h6,
+                                        modifier = Modifier
+                                            .padding(horizontal = Padding.medium)
+                                            .clickable {
+                                                if (multiplePermissionState.shouldShowRationale) {
+                                                    viewModel.sendRecipeScreenUiEvent(
+                                                        RecipeScreenEvents.ShowSnackbar(
+                                                            "Please provide storage permission to continue"
+                                                        )
+                                                    )
+                                                } else if (!multiplePermissionState.allPermissionsGranted) {
+                                                    multiplePermissionState.launchMultiplePermissionRequest()
+                                                } else {
+                                                    exportPdf(
+                                                        context = context,
+                                                        ingredients = ingredients,
+                                                        viewModel = viewModel,
+                                                        name = screenState.recipe.title
+                                                    )
+                                                }
+
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.height(Padding.medium))
+                                    IconButton(onClick = {
                                         if (multiplePermissionState.shouldShowRationale) {
-                                            viewModel.sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar(
-                                                "Please provide storage permission to continue"))
+                                            viewModel.sendRecipeScreenUiEvent(
+                                                RecipeScreenEvents.ShowSnackbar(
+                                                    "Please provide storage permission to continue"
+                                                )
+                                            )
                                         } else if (!multiplePermissionState.allPermissionsGranted) {
                                             multiplePermissionState.launchMultiplePermissionRequest()
                                         } else {
-                                            exportPdf(context = context,
+                                            exportPdf(
+                                                context = context,
                                                 ingredients = ingredients,
                                                 viewModel = viewModel,
-                                                name = screenState.recipe.title)
+                                                name = screenState.recipe.title
+                                            )
                                         }
-
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.DownloadForOffline,
+                                            contentDescription = "download recipe"
+                                        )
                                     }
-                            )
-                           Spacer(modifier = Modifier.height(Padding.medium))
-                            IconButton(onClick = {
-                                if (multiplePermissionState.shouldShowRationale) {
-                                    viewModel.sendRecipeScreenUiEvent(RecipeScreenEvents.ShowSnackbar(
-                                        "Please provide storage permission to continue"))
-                                } else if (!multiplePermissionState.allPermissionsGranted) {
-                                    multiplePermissionState.launchMultiplePermissionRequest()
-                                } else {
-                                    exportPdf(context = context,
-                                        ingredients = ingredients,
-                                        viewModel = viewModel,
-                                        name = screenState.recipe.title)
                                 }
-                            }) {
-                                Icon(imageVector = Icons.Default.DownloadForOffline,
-                                    contentDescription = "download recipe")
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+                            item {
+                                NumberOfPersonSlider(
+                                    currentValue = numberOfPersons,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = Padding.medium)
+                                ) {
+                                    viewModel.onSliderValueChanged(it)
+                                    Log.d("recipescreen", "number of persons $numberOfPersons")
+                                }
+                            }
+
+                            item {
+                                Text(
+                                    text = "Ingredients",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.h4,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+
+
+                            items(ingredients) { ingredient ->
+                                val ingredientQuantity = ingredient.quantity.toFloatOrNull()
+                                    ?.times(viewModel.numberOfPersons.value)
+                                val modifiedIngredient = if (ingredientQuantity == null) {
+                                    ""
+                                } else {
+                                    "$ingredientQuantity "
+                                }
+                                Text(
+                                    text = " ${modifiedIngredient}${ingredient.description}",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Normal,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+                            item {
+                                Text(
+                                    text = "Method",
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.h4,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
+                            }
+
+                            items(screenState.recipe.method) { method ->
+                                Text(
+                                    text = method,
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Normal,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(horizontal = Padding.medium)
+                                )
+                                Spacer(modifier = Modifier.height(Padding.medium))
                             }
                         }
-                       Spacer(modifier = Modifier.height(Padding.medium))
-                    }
-
-                    item {
-                        NumberOfPersonSlider(
-                            currentValue = numberOfPersons,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                             .padding(horizontal = Padding.medium)
-                        ) {
-                            viewModel.onSliderValueChanged(it)
-                            Log.d("recipescreen", "number of persons $numberOfPersons")
-                        }
-                    }
-
-                    item {
-                        Text(
-                            text = "Ingredients",
-                            fontFamily = lemonMilkFonts,
-                            fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.h4,
-                            modifier = Modifier.padding(horizontal = Padding.medium)
-                        )
-                      Spacer(modifier = Modifier.height(Padding.medium))
-                    }
-
-
-
-                    items(ingredients) { ingredient ->
-                        val ingredientQuantity = ingredient.quantity.toFloatOrNull()
-                            ?.times(viewModel.numberOfPersons.value)
-                        val modifiedIngredient = if (ingredientQuantity == null) {
-                            ""
-                        } else {
-                            "$ingredientQuantity "
-                        }
-                        Text(
-                            text = " ${modifiedIngredient}${ingredient.description}",
-                            fontFamily = lemonMilkFonts,
-                            fontWeight = FontWeight.Normal,
-                            style = MaterialTheme.typography.body1,
-                            modifier = Modifier.padding(horizontal = Padding.medium)
-                        )
-                       Spacer(modifier = Modifier.height(Padding.medium))
-                    }
-
-                    item {
-                        Text(
-                            text = "Method",
-                            fontFamily = lemonMilkFonts,
-                            fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.h4,
-                            modifier = Modifier.padding(horizontal = Padding.medium)
-                        )
-                        Spacer(modifier = Modifier.height(Padding.medium))
-                    }
-
-                    items(screenState.recipe.method) { method ->
-                        Text(
-                            text = method,
-                            fontFamily = lemonMilkFonts,
-                            fontWeight = FontWeight.Normal,
-                            style = MaterialTheme.typography.body1,
-                            modifier = Modifier.padding(horizontal = Padding.medium)
-                        )
-                        Spacer(modifier = Modifier.height(Padding.medium))
                     }
                 }
-            }
-        }
-    }
-}
-
+            }}}}
 fun exportPdf(context: Context, ingredients: List<Ingredient>, viewModel: RecipeScreenViewModel, name: String) {
 
 
