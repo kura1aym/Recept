@@ -145,7 +145,7 @@ fun RecipeListUi(
     windowSize : WindowWidthSizeClass
 ){
     when (windowSize) {
-        WindowWidthSizeClass.Medium -> {
+       WindowWidthSizeClass.Medium -> {
             Scaffold(
                 scaffoldState = scaffoldState,
                 backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
@@ -402,7 +402,7 @@ fun RecipeListUi(
             }
 
         }
-        else ->{
+        WindowWidthSizeClass.Expanded -> {
             Scaffold(
                 scaffoldState = scaffoldState,
                 backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
@@ -575,7 +575,7 @@ fun RecipeListUi(
                             }
                         }
 
-                            Row(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .wrapContentHeight()
@@ -600,11 +600,11 @@ fun RecipeListUi(
                                             launchSingleTop = true
                                         }
                                     } else {
-                                       viewModel.onSelectRadioButtonClicked(item.title)
+                                        viewModel.onSelectRadioButtonClicked(item.title)
                                     }
                                 }
                         ) {
-                                Spacer(modifier = Modifier.width(40.dp))
+                            Spacer(modifier = Modifier.width(40.dp))
                             SubcomposeAsyncImage(
                                 model = item.imageUrl,
                                 contentDescription = null,
@@ -622,7 +622,7 @@ fun RecipeListUi(
                                     BlendMode.Multiply
                                 ) else null
                             )
-                                Spacer(modifier = Modifier.width(40.dp))
+                            Spacer(modifier = Modifier.width(40.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -633,7 +633,7 @@ fun RecipeListUi(
                                     fontFamily = lemonMilkFonts,
                                     fontWeight = FontWeight.Normal,
                                     modifier = Modifier
-                                      .width(500.dp),
+                                        .width(500.dp),
 
 
 
@@ -667,5 +667,261 @@ fun RecipeListUi(
                 }
             }
 
-    }
-}}
+
+        }
+        else -> {
+            Scaffold(
+                scaffoldState = scaffoldState,
+                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+            ) { padding ->
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(LocalConfiguration.current.screenHeightDp.dp / 2)
+                                .graphicsLayer {
+                                    shadowElevation = 8.dp.toPx()
+                                    shape = RectangleMinusSemicircleShape()
+                                    clip = true
+                                }
+                                .drawBehind {
+                                    drawRect(color = Color(0xFF000000))
+                                },
+                        ) {
+                            SubcomposeAsyncImage(
+                                model = viewModel.imageUrl.value,
+                                loading = {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .padding(50.dp)
+                                            .size(50.dp),
+                                        color = MaterialTheme.colors.primaryVariant
+                                    )
+                                },
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer {
+                                        this.alpha = 0.25f
+                                        shadowElevation = 8.dp.toPx()
+                                        shape = RectangleMinusSemicircleShape()
+                                        clip = true
+                                    }
+                                    .align(Alignment.Center),
+                                contentScale = ContentScale.Crop,
+                                filterQuality = FilterQuality.Medium
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.TopCenter)
+                                    .drawBehind {
+                                        drawRect(Color.Transparent)
+                                    },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AnimatedVisibility(visible = isEditModeOn) {
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.receiveFromRecipeListScreenEvents(
+                                                FromRecipeListScreenEvents.DeleteButtonClicked
+                                            )
+                                        },
+                                        modifier = Modifier.padding(Padding.small)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Delete,
+                                            contentDescription = "goto home screen",
+                                            tint = androidx.compose.material3.MaterialTheme.colorScheme.background
+                                        )
+                                    }
+                                }
+
+                                AnimatedVisibility(visible = !isEditModeOn) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        IconButton(
+                                            onClick = { navController.navigateUp() },
+                                            modifier = Modifier.padding(Padding.small)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowBack,
+                                                contentDescription = "goto home screen",
+                                                tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(Padding.medium))
+                                        AnimatedVisibility(visible = !showSearchBoxState.value) {
+                                            IconButton(onClick = {
+                                                showSearchBoxState.value = true
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Search,
+                                                    contentDescription = "search recipe",
+                                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                                    modifier = Modifier.size(40.dp)
+                                                )
+                                            }
+                                        }
+                                        AnimatedVisibility(visible = showSearchBoxState.value) {
+                                            OutlinedTextField(
+                                                value = searchBoxState,
+                                                onValueChange = viewModel::onSearchBoxValueChanged,
+                                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                    focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary, // Color when the text field is focused
+                                                    unfocusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.background, // Color when the text field is not focused
+                                                    textColor = androidx.compose.material3.MaterialTheme.colorScheme.background, // Text color
+                                                    cursorColor = androidx.compose.material3.MaterialTheme.colorScheme.primary // Color of the cursor
+                                                ),
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.8f),
+                                                label = {
+                                                    Text(
+                                                        "Search ${viewModel.category.value} recipes",
+                                                        color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                                                    )
+                                                },
+                                                placeholder = {
+                                                    Text(
+                                                        "Search ${viewModel.category.value} recipes",
+                                                        color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                                                    )
+                                                },
+                                                keyboardActions = KeyboardActions(onSearch = {
+                                                    keyboardController?.hide()
+                                                }),
+                                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
+                                            )
+                                            Spacer(modifier = Modifier.width(Padding.medium))
+
+                                        }
+                                        AnimatedVisibility(visible = showSearchBoxState.value) {
+                                            IconButton(
+                                                onClick = {
+                                                    showSearchBoxState.value = false
+                                                    viewModel.onClearSearchBoxButtonClicked()
+                                                },
+                                                modifier = Modifier.align(Alignment.CenterVertically)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Clear,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = viewModel.category.value.ifBlank { "Search across all recipes!" },
+                                style = MaterialTheme.typography.h4,
+                                fontWeight = FontWeight.ExtraLight,
+                                textAlign = TextAlign.Center,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.background,
+                                fontFamily = lemonMilkFonts,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+
+                    items(state.items.size) { index ->
+                        Log.d("HomeScreen", "item size is ${state.items.size} and index is $index")
+                        val item = state.items[index]
+
+                        LaunchedEffect(key1 = Unit) {
+                            if (index >= state.items.size - 5 && !state.endReached && !state.isLoading) {
+                                Log.d("recipelistscreen", "entered if statement")
+                                viewModel.loadNextItems()
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(Padding.small)
+                                .combinedClickable(onLongClick = {
+                                    if (!isEditModeOn && viewModel.getSavedRecipes.value) {
+                                        viewModel.isEditModeOn.value = true
+                                    }
+                                }) {
+                                    if (!isEditModeOn) {
+                                        val title =
+                                            URLEncoder.encode(
+                                                item.title,
+                                                StandardCharsets.UTF_8.toString()
+                                            )
+                                        val tag =
+                                            URLEncoder.encode(
+                                                item.tag,
+                                                StandardCharsets.UTF_8.toString()
+                                            )
+                                        navController.navigate(Screen.RecipeScreen.route + "/${title}/${tag}/${viewModel.getSavedRecipes.value}") {
+                                            launchSingleTop = true
+                                        }
+                                    } else {
+                                        viewModel.onSelectRadioButtonClicked(item.title)
+                                    }
+                                }
+                        ) {
+                            SubcomposeAsyncImage(
+                                model = item.imageUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height((0.8f * 250).dp)
+                                    .graphicsLayer {
+                                        shape = RoundedCornerShape(Padding.medium)
+                                        clip = true
+                                    },
+                                contentScale = ContentScale.Crop,
+                                filterQuality = FilterQuality.Medium,
+                                colorFilter = if (isEditModeOn) ColorFilter.tint(
+                                    Color.DarkGray,
+                                    BlendMode.Multiply
+                                ) else null
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = item.title,
+                                    fontFamily = lemonMilkFonts,
+                                    fontWeight = FontWeight.Normal,
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.7f)
+                                )
+                                AnimatedVisibility(isEditModeOn) {
+                                    RadioButton(
+                                        selected = viewModel.recipesToBeDeleted.contains(item.title),
+                                        onClick = {
+                                            viewModel.onSelectRadioButtonClicked(title = item.title)
+                                        })
+                                }
+                            }
+                        }
+                    }
+                    if (state.isLoading) {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colors.primaryVariant,
+                                    modifier = Modifier
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }}}
