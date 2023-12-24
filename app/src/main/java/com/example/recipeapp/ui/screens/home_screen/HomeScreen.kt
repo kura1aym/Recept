@@ -25,6 +25,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.DensityMedium
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Search
@@ -907,7 +908,7 @@ fun HomeScreen(
                                         modifier = Modifier.padding(Padding.small)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.MenuOpen,
+                                            imageVector = Icons.Default.DensityMedium,
                                             contentDescription = stringResource(R.string.menu_icon_description),
                                             tint = MaterialTheme.colorScheme.primaryContainer,
                                             modifier = Modifier.size(40.dp)
